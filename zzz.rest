@@ -1,0 +1,26 @@
+# POST  http://localhost:8000/auth/register/
+# Content-Type: application/json
+
+# {
+#     "firstName": "Samson",
+#     "lastName": "Amos",
+#     "email":"v3dent@gmail.com",
+#     "password":"Chelsea24462!"
+# }
+
+# POST http://localhost:8000/auth/login/
+# Content-Type: application/json
+
+# {
+#    "email":"v3dent@gmail.com",
+#    "password":"Chelsea24462!" 
+# }
+
+# POST  http://localhost:8000/auth/change-password/
+# Content-Type: application/json
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTY3NjY3Mzg2MywiZXhwIjoxNjc2Njc0NzYzfQ.ScNvhROaC8SXK80yR3hqH_fkd8goQ8zxXCw1jMjjNeU
+
+# {
+#     "currentPassword": "Spotify24462!",
+#     "newPassword": "Chelsea24462!"
+# }
