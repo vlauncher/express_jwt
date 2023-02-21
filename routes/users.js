@@ -89,11 +89,11 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    const accessToken = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
+    const access = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
       expiresIn: "15m",
     });
 
-    const refreshToken = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
+    const refresh = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
 
@@ -102,7 +102,7 @@ router.post("/login", async (req, res) => {
 
     await user.save();
 
-    res.json({ accessToken, refreshToken });
+    res.json({ access, refresh });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
@@ -135,7 +135,7 @@ router.post("/forgot-password", async (req, res) => {
       from: "your-email@example.com",
       to: user.email,
       subject: "Reset your password",
-      html: `Click <a href="http://localhost:8000/auth/reset-password/${token}">here</a> to reset your password.`,
+      html: `Click <a href="http://${req.hostname}/auth/reset-password/${token}">here</a> to reset your password.`,
     };
 
     await transporter.sendMail(mailOptions);
@@ -236,15 +236,15 @@ router.post("/google-auth", async (req, res) => {
       await user.save();
     }
 
-    const accessToken = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
+    const access = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
       expiresIn: "15m",
     });
 
-    const refreshToken = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
+    const refresh = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
 
-    res.json({ accessToken, refreshToken });
+    res.json({ access, refresh });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
@@ -263,13 +263,13 @@ const verifyGoogleAccessToken = async (access_token) => {
 // Refresh an access token
 router.post("/refresh-token", async (req, res) => {
   try {
-    const { refreshToken } = req.body;
+    const { refresh } = req.body;
 
-    if (!refreshToken) {
+    if (!refresh) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const decodedToken = jwt.verify(refreshToken, process.env.JWT_SECRET);
+    const decodedToken = jwt.verify(refresh, process.env.JWT_SECRET);
 
     const user = await User.findByPk(decodedToken.userId);
 
@@ -282,12 +282,12 @@ router.post("/refresh-token", async (req, res) => {
         .status(401)
         .json({ message: "Google accounts cannot refresh tokens" });
     }
-    jwt.verify(refreshToken, user.refreshToken, (err, decoded) => {
+    jwt.verify(refresh, user.refresh, (err, decoded) => {
       if (err) {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const accessToken = jwt.sign(
+      const access = jwt.sign(
         { userId: user.id },
         process.env.JWT_SECRET,
         {
@@ -295,7 +295,7 @@ router.post("/refresh-token", async (req, res) => {
         }
       );
 
-      res.json({ accessToken });
+      res.json({ access });
     });
   } catch (err) {
     console.error(err);

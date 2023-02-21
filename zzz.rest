@@ -24,3 +24,10 @@
 #     "currentPassword": "Spotify24462!",
 #     "newPassword": "Chelsea24462!"
 # }
+
+# POST  http://localhost:8000/auth/forgot-password/
+# Content-Type: application/json
+
+# {
+#     "email" : "v3dent@gmail.com"
+# }
