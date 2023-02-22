@@ -14,8 +14,8 @@ router.post("/register", async (req, res) => {
 
     // Create the user in the database
     const user = await User.create({
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
+      first_name: req.body.first_name,
+      last_name: req.body.last_name,
       email: req.body.email,
       password: hashedPassword,
     });
@@ -37,15 +37,15 @@ router.post("/register", async (req, res) => {
       from: "your-email@example.com",
       to: user.email,
       subject: "Verify your email address",
-      html: `Click <a href="http://localhost:8000/auth/verify-email/${token}">here</a> to verify your email address.`,
+      html: `Click <a href="http://${req.hostname}:3000/auth/verify-email/${token}">here</a> to verify your email address.`,
     };
 
     await transporter.sendMail(mailOptions);
 
-    res.status(201).json({ message: "User created" });
+    res.status(201).json({ msg: "User created" });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ msg: "Server error" });
   }
 });
 
@@ -57,17 +57,17 @@ router.get("/verify-email/:token", async (req, res) => {
     const user = await User.findByPk(userId);
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ msg: "User not found" });
     }
 
     user.verified = true;
 
     await user.save();
 
-    res.redirect("/auth/login");
+    res.redirect("/login");
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ msg: "Server error" });
   }
 });
 
@@ -77,7 +77,7 @@ router.post("/login", async (req, res) => {
     const user = await User.findOne({ where: { email: req.body.email } });
 
     if (!user) {
-      return res.status(401).json({ message: "Invalid email or password" });
+      return res.status(401).json({ msg: "No user with email : "+req.body.email });
     }
 
     const isPasswordValid = await bcrypt.compare(
@@ -86,7 +86,7 @@ router.post("/login", async (req, res) => {
     );
 
     if (!isPasswordValid) {
-      return res.status(401).json({ message: "Invalid email or password" });
+      return res.status(401).json({ msg: "Wrong password" });
     }
 
     const access = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
@@ -105,7 +105,7 @@ router.post("/login", async (req, res) => {
     res.json({ access, refresh });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ msg: "Server error" });
   }
 });
 
@@ -115,7 +115,7 @@ router.post("/forgot-password", async (req, res) => {
     const user = await User.findOne({ where: { email: req.body.email } });
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ msg: "User not found" });
     }
 
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
@@ -135,15 +135,15 @@ router.post("/forgot-password", async (req, res) => {
       from: "your-email@example.com",
       to: user.email,
       subject: "Reset your password",
-      html: `Click <a href="http://${req.hostname}/auth/reset-password/${token}">here</a> to reset your password.`,
+      html: `Click <a href="http://${req.hostname}:3000/reset-password/${token}">here</a> to reset your password.`,
     };
 
     await transporter.sendMail(mailOptions);
 
-    res.json({ message: "Password reset email sent" });
+    res.json({ msg: "Password reset email sent" });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ msg: "Server error" });
   }
 });
 
@@ -155,7 +155,7 @@ router.post("/reset-password/:token", async (req, res) => {
     const user = await User.findByPk(userId);
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ msg: "User not found" });
     }
 
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
@@ -164,20 +164,20 @@ router.post("/reset-password/:token", async (req, res) => {
 
     await user.save();
 
-    res.json({ message: "Password reset" });
+    res.json({ msg: "Password reset" });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ msg: "Server error" });
   }
 });
 
 // Change a user's password
-router.post("/change-password", verifyAccessToken, async (req, res) => {
+router.put("/change-password", verifyAccessToken, async (req, res) => {
   try {
     const user = await User.findByPk(req.userId);
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ msg: "User not found" });
     }
 
     const isPasswordValid = await bcrypt.compare(
@@ -186,7 +186,7 @@ router.post("/change-password", verifyAccessToken, async (req, res) => {
     );
 
     if (!isPasswordValid) {
-      return res.status(401).json({ message: "Invalid password" });
+      return res.status(401).json({ msg: "Invalid password" });
     }
 
     const hashedPassword = await bcrypt.hash(req.body.newPassword, 10);
@@ -195,10 +195,10 @@ router.post("/change-password", verifyAccessToken, async (req, res) => {
 
     await user.save();
 
-    res.json({ message: "Password changed" });
+    res.json({ msg: "Password changed" });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ msg: "Server error" });
   }
 });
 
@@ -210,19 +210,19 @@ router.post("/google-auth", async (req, res) => {
     const profile = await verifyGoogleAccessToken(access_token);
 
     if (profile.email !== email) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ msg: "Unauthorized" });
     }
 
     let user = await User.findOne({ where: { email } });
 
     if (!user) {
       const fullName = name.split(" ");
-      const firstName = fullName[0];
-      const lastName = fullName[1] || "";
+      const first_name = fullName[0];
+      const last_name = fullName[1] || "";
 
       user = await User.create({
-        firstName,
-        lastName,
+        first_name,
+        last_name,
         email,
         password: null,
         verified: true,
@@ -247,7 +247,7 @@ router.post("/google-auth", async (req, res) => {
     res.json({ access, refresh });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ msg: "Server error" });
   }
 });
 
@@ -266,7 +266,7 @@ router.post("/refresh-token", async (req, res) => {
     const { refresh } = req.body;
 
     if (!refresh) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ msg: "Unauthorized" });
     }
 
     const decodedToken = jwt.verify(refresh, process.env.JWT_SECRET);
@@ -274,17 +274,17 @@ router.post("/refresh-token", async (req, res) => {
     const user = await User.findByPk(decodedToken.userId);
 
     if (!user) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ msg: "Unauthorized" });
     }
 
     if (user.googleAccessToken || user.googleRefreshToken) {
       return res
         .status(401)
-        .json({ message: "Google accounts cannot refresh tokens" });
+        .json({ msg: "Google accounts cannot refresh tokens" });
     }
     jwt.verify(refresh, user.refresh, (err, decoded) => {
       if (err) {
-        return res.status(401).json({ message: "Unauthorized" });
+        return res.status(401).json({ msg: "Unauthorized" });
       }
 
       const access = jwt.sign(
@@ -299,7 +299,7 @@ router.post("/refresh-token", async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ msg: "Server error" });
   }
 });
 
