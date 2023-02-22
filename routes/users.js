@@ -37,7 +37,7 @@ router.post("/register", async (req, res) => {
       from: "your-email@example.com",
       to: user.email,
       subject: "Verify your email address",
-      html: `Click <a href="http://${req.hostname}:3000/auth/verify-email/${token}">here</a> to verify your email address.`,
+      html: `Click <a href="http://${req.hostname}/auth/verify-email/${token}">here</a> to verify your email address.`,
     };
 
     await transporter.sendMail(mailOptions);
@@ -135,7 +135,7 @@ router.post("/forgot-password", async (req, res) => {
       from: "your-email@example.com",
       to: user.email,
       subject: "Reset your password",
-      html: `Click <a href="http://${req.hostname}:3000/reset-password/${token}">here</a> to reset your password.`,
+      html: `Click <a href="http://${req.hostname}/reset-password/${token}">here</a> to reset your password.`,
     };
 
     await transporter.sendMail(mailOptions);
