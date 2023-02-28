@@ -18,14 +18,14 @@ export const register = createAsyncThunk(
   'auth/register',
   async (user, thunkAPI) => {
     try {
-      const response = await axios.post('/auth/register/', user)
+      const response = await axios.post('http://localhost:8000/auth/register/', user)
       if (response.data) {
         localStorage.setItem('user', JSON.stringify(response.data))
       }
-      toast.success('SignUp success')
-      return response.data
+      toast.success(response.data.msg)
+      return response.data.msg
     } catch (error) {
-      const message = error.response.data['email'][0]
+      const message = error.response.data.msg
       console.log(message)
       return thunkAPI.rejectWithValue(message)
     }
@@ -35,12 +35,12 @@ export const register = createAsyncThunk(
 // Login user
 export const login = createAsyncThunk('auth/login', async (user, thunkAPI) => {
   try {
-    const response = await axios.post('/auth/login/', user)
+    const response = await axios.post('http://localhost:8000/auth/login/', user)
     if (response.data) {
       localStorage.setItem('user', JSON.stringify(response.data))
     }
-    toast.success('Login success')
-    return response.data
+    toast.success(response.data.msg)
+    return response.data.msg
   } catch (error) {
     const message = error.response.data.msg
     console.log(message);
@@ -56,7 +56,7 @@ export const logout = createAsyncThunk('auth/logout', async () => {
 export const verifyEmail = createAsyncThunk(
   'auth/verifyEmail',
   async (token) => {
-    const response = await fetch(`/auth/verify-email/${token}/`);
+    const response = await fetch(`http://localhost:8000/auth/verify-email/${token}/`);
     const data = await response.json();
     return data;
   }
@@ -74,7 +74,7 @@ export const confirmEmail = createAsyncThunk(
 export const requestPasswordReset = createAsyncThunk(
   'auth/requestPasswordReset',
   async (email) => {
-    const response = await fetch('/auth/forgot-password', {
+    const response = await fetch('http://localhost:8000/auth/forgot-password', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -90,7 +90,7 @@ export const requestPasswordReset = createAsyncThunk(
 export const resetPassword = createAsyncThunk(
   'auth/resetPassword',
   async ({ token, password }) => {
-    const response = await fetch(`/auth/reset-password/${token}`, {
+    const response = await fetch(`http://localhost:8000/auth/reset-password/${token}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -106,7 +106,7 @@ export const changePassword = createAsyncThunk("auth/changePassword", async ({ c
   try {
     const token = thunkAPI.getState().auth.user["access"];
     console.log(token);
-    const response = await axios.put('/auth/change-password/', { currentPassword, newPassword }, {
+    const response = await axios.put('http://localhost:8000/auth/change-password/', { currentPassword, newPassword }, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -115,7 +115,7 @@ export const changePassword = createAsyncThunk("auth/changePassword", async ({ c
     return response.data.msg
   } catch (error) {
     const message = error.response.data.msg
-    console.log(message);
+    toast.error(message)
     return thunkAPI.rejectWithValue(message)
   }
 });

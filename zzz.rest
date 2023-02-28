@@ -12,7 +12,7 @@
 # Content-Type: application/json
 
 # {
-#    "email":"v3dent@gmail.com",
+#    "email":"v2dent@gmail.com",
 #    "password":"Chelsea24462!" 
 # }
 

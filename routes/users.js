@@ -102,7 +102,7 @@ router.post("/login", async (req, res) => {
 
     await user.save();
 
-    res.json({ access, refresh });
+    res.json({ msg:"Signed Up", access, refresh });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Server error" });
