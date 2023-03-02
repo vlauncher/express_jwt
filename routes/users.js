@@ -42,7 +42,7 @@ router.post("/register", async (req, res) => {
 
     await transporter.sendMail(mailOptions);
 
-    res.status(201).json({ msg: "User created" });
+    res.status(201).json({ msg: "Registeration success check email to verify" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Server error" });
