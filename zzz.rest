@@ -2,19 +2,19 @@
 # Content-Type: application/json
 
 # {
-#     "firstName": "Samson",
-#     "lastName": "Amos",
+#     "first_name": "Samson",
+#     "last_name": "Amos",
 #     "email":"v3dent@gmail.com",
 #     "password":"Chelsea24462!"
 # }
 
-# POST http://localhost:8000/auth/login/
-# Content-Type: application/json
+POST http://localhost:8000/auth/login/
+Content-Type: application/json
 
-# {
-#    "email":"v2dent@gmail.com",
-#    "password":"Chelsea24462!" 
-# }
+{
+   "email":"v2dent@gmail.com",
+   "password":"Chelsea24462!" 
+}
 
 # PUT  http://localhost:8000/auth/change-password/
 # Content-Type: application/json

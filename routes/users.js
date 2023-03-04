@@ -8,17 +8,24 @@ const verifyAccessToken = require('../middlewares/auth');
 // Register Route
 // Register a new user
 router.post("/register", async (req, res) => {
+  const{first_name,last_name,email,password} = req.body;
   try {
     // Hash the password
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
+    const userExists = await User.findOne({where:{email}})
+    if(userExists){
+      res.status(400).json({msg:"User already exists"});
+      return
+    }
     // Create the user in the database
     const user = await User.create({
-      first_name: req.body.first_name,
-      last_name: req.body.last_name,
-      email: req.body.email,
+      first_name: first_name,
+      last_name: last_name,
+      email: email,
       password: hashedPassword,
     });
+
 
     // Send the verification email
     const transporter = nodemailer.createTransport({
@@ -32,6 +39,7 @@ router.post("/register", async (req, res) => {
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
       expiresIn: "1d",
     });
+    
 
     const mailOptions = {
       from: "your-email@example.com",
@@ -77,7 +85,7 @@ router.post("/login", async (req, res) => {
     const user = await User.findOne({ where: { email: req.body.email } });
 
     if (!user) {
-      return res.status(401).json({ msg: "No user with email : "+req.body.email });
+      return res.status(401).json({ msg: `No user with email : ${req.body.email}` });
     }
 
     const isPasswordValid = await bcrypt.compare(
@@ -102,7 +110,7 @@ router.post("/login", async (req, res) => {
 
     await user.save();
 
-    res.json({ msg:"Signed Up", access, refresh });
+    res.json({ msg:"Logged in", access, refresh });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Server error" });

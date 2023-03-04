@@ -6,9 +6,7 @@ const database = new Sequelize({
     storage:'authdb.sqlite3'
 });
 
-database.authenticate(
-    console.log(`Database connected`)
-)
+database.sync();
 
 module.exports = database;
 
